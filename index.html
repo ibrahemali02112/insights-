@@ -1,0 +1,2596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insights+ | Professional Analytics Dashboard</title>
+    
+    <!-- React from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for real charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- SheetJS for XLSX file support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Heroicons -->
+    <script src="https://unpkg.com/@heroicons/react@1.0.6/outline/esm/index.js"></script>
+    
+    <style>
+        .gradient-bg-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-bg-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .gradient-bg-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .gradient-bg-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .gradient-bg-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .gradient-bg-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .gradient-bg-7 { background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%); }
+        .gradient-bg-8 { background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); }
+        
+        .gradient-bg {
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .card-linked {
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .card-selected {
+            border: 2px solid #8b5cf6;
+            background-color: #faf5ff;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+        
+        /* Professional Dropdown Styles */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+            }
+        
+        .dropdown-button {
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 150px;
+            font-weight: 500;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+          
+        }
+        
+        .dropdown-button:hover {
+            border-color: #9ca3af;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+              
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 100;
+            max-height: 300px;
+            width: auto;
+            overflow-y: auto;
+            margin-top: 4px;
+            
+        }
+        
+        .dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+          
+        }
+        
+        .dropdown-item.danger {
+            color: #ef4444;
+        }
+        
+        .dropdown-item.danger:hover {
+            background-color: #fef2f2;
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 4px 0;
+        }
+        
+        /* Professional Alert Styles */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .alert-box {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        
+        .alert-icon.warning {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+        
+        .alert-icon.danger {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+        
+        .alert-icon.success {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+        
+        .alert-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .alert-message {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+        
+        .alert-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        
+        .alert-button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 100px;
+        }
+        
+        .alert-button-confirm {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .alert-button-confirm:hover {
+            background: #dc2626;
+        }
+        
+        .alert-button-cancel {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        
+        .alert-button-cancel:hover {
+            background: #e5e7eb;
+        }
+        
+        .alert-button-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .alert-button-success:hover {
+            background: #059669;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Data Editor Styles */
+        .data-editor {
+            max-height: 500px;
+            overflow: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .editable-cell {
+            background: transparent;
+            border: 1px dashed #d1d5db;
+            border-radius: 4px;
+            padding: 4px 8px;
+            width: 100%;
+        }
+        
+        .editable-cell:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #f0f9ff;
+        }
+        
+        /* Chart interaction styles */
+        .chart-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .chart-tooltip.active {
+            opacity: 1;
+        }
+        
+        .chart-highlight {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 2px solid #3b82f6;
+        }
+        
+        .chart-clickable {
+            cursor: pointer;
+        }
+        
+        .chart-clickable:hover {
+            opacity: 0.8;
+        }
+        
+        /* Animation for dynamic updates */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* Live data indicator */
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #10b981;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Dynamic chart controls */
+        .dynamic-controls {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        /* Analysis table styles */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .analysis-table th,
+        .analysis-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            text-align: center;
+        }
+        
+        .analysis-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .analysis-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        /* Report page styles */
+        .report-chart {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            background: white;
+        }
+        
+        /* Mobile navigation */
+        .mobile-nav-button {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-nav-button {
+                display: block;
+            }
+            
+            .nav-menu {
+                display: none;
+              width: auto;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                z-index: 120;
+                padding: 1rem;
+            }
+            
+            .nav-menu.open {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+        
+            }
+        }
+        .py-4{
+            position: relative;
+            top: 50px
+        ;
+        }
+        /* Dataset badge */
+        .dataset-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f3f4f6;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .dataset-badge button {
+            margin-left: 6px;
+            color: #6b7280;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dataset-badge button:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback, useMemo } = React;
+        
+        // Enhanced sample data with time series for dynamic updates
+        const generateSampleData = () => {
+            const baseData = [
+                { id: 1, category: 'Electronics', product: 'Laptop', sales: 4000, revenue: 2400, profit: 2400, region: 'North', quarter: 'Q1', month: 'Jan', year: 2023 },
+                { id: 2, category: 'Electronics', product: 'Phone', sales: 3000, revenue: 1398, profit: 2210, region: 'South', quarter: 'Q1', month: 'Jan', year: 2023 },
+                { id: 3, category: 'Furniture', product: 'Chair', sales: 2000, revenue: 9800, profit: 2290, region: 'East', quarter: 'Q1', month: 'Feb', year: 2023 },
+                { id: 4, category: 'Furniture', product: 'Desk', sales: 2780, revenue: 3908, profit: 2000, region: 'West', quarter: 'Q2', month: 'Feb', year: 2023 },
+                { id: 5, category: 'Electronics', product: 'Tablet', sales: 3490, revenue: 4300, profit: 2100, region: 'North', quarter: 'Q2', month: 'Mar', year: 2023 },
+            ];
+            
+            // Add time series data for dynamic updates
+            const timeSeriesData = [];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+            const products = ['Laptop', 'Phone', 'Tablet', 'Chair', 'Desk'];
+            
+            months.forEach((month, monthIndex) => {
+                products.forEach((product, productIndex) => {
+                    const baseValue = 1000 + (productIndex * 500) + (monthIndex * 200);
+                    const randomFactor = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
+                    
+                    timeSeriesData.push({
+                        id: monthIndex * products.length + productIndex + 1,
+                        category: product === 'Laptop' || product === 'Phone' || product === 'Tablet' ? 'Electronics' : 'Furniture',
+                        product: product,
+                        sales: Math.round(baseValue * randomFactor),
+                        revenue: Math.round(baseValue * randomFactor * 0.6),
+                        profit: Math.round(baseValue * randomFactor * 0.3),
+                        region: ['North', 'South', 'East', 'West'][productIndex % 4],
+                        quarter: monthIndex < 3 ? 'Q1' : 'Q2',
+                        month: month,
+                        year: 2023,
+                        timestamp: new Date(2023, monthIndex, productIndex + 1).getTime()
+                    });
+                });
+            });
+            
+            return timeSeriesData;
+        };
+        
+        // Calculation types with distinct operations
+        const CALCULATION_TYPES = [
+            { value: 'count', label: 'Count' },
+            { value: 'sum', label: 'Sum' },
+            { value: 'avg', label: 'Average' },
+            { value: 'min', label: 'Minimum' },
+            { value: 'max', label: 'Maximum' },
+            { value: 'distinct_count', label: 'Distinct Count' },
+            { value: 'distinct_sum', label: 'Distinct Sum' }
+        ];
+        
+        // Chart types
+        const CHART_TYPES = [
+            { value: 'bar', label: 'Bar Chart' },
+            { value: 'line', label: 'Line Chart' },
+            { value: 'pie', label: 'Pie Chart' },
+            { value: 'area', label: 'Area Chart' },
+            { value: 'doughnut', label: 'Doughnut Chart' },
+            { value: 'polarArea', label: 'Polar Area Chart' },
+            { value: 'radar', label: 'Radar Chart' },
+            { value: 'scatter', label: 'Scatter Chart' }
+        ];
+        
+        // Enhanced Color palettes
+        const COLOR_PALETTES = {
+            default: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            ocean: ['#0077be', '#00a8cc', '#40e0d0', '#20b2aa', '#4682b4', '#5f9ea0'],
+            sunset: ['#ff6b35', '#f7931e', '#ffd23f', '#06ffa5', '#b19cd9', '#ff9999'],
+            forest: ['#228b22', '#32cd32', '#90ee90', '#98fb98', '#00ff7f', '#7cfc00'],
+            vintage: ['#d4a574', '#c19a6b', '#e5c9a8', '#8b7355', '#a52a2a', '#deb887'],
+            neon: ['#ff00ff', '#00ffff', '#ffff00', '#ff0080', '#80ff00', '#0080ff'],
+            pastel: ['#ffb3ba', '#ffdfba', '#ffffba', '#baffc9', '#bae1ff', '#e0bbff'],
+            jewel: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3']
+        };
+        
+        // Background gradients
+        const BACKGROUND_GRADIENTS = [
+            'gradient-bg-1', 'gradient-bg-2', 'gradient-bg-3', 'gradient-bg-4',
+            'gradient-bg-5', 'gradient-bg-6', 'gradient-bg-7', 'gradient-bg-8'
+        ];
+        
+        // Professional Alert Component
+        function Alert({ type = "warning", title, message, onConfirm, onCancel, show = false, confirmText = "Confirm", cancelText = "Cancel" }) {
+            if (!show) return null;
+            
+            const iconClass = `alert-icon ${type}`;
+            let iconSvg;
+            
+            if (type === "warning") {
+                iconSvg = React.createElement('svg', { 
+                    width: "24", 
+                    height: "24", 
+                    fill: "none", 
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor"
+                },
+                    React.createElement('path', { 
+                        strokeLinecap: "round", 
+                        strokeLinejoin: "round", 
+                        strokeWidth: "2", 
+                        d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" 
+                    })
+                );
+            } else if (type === "danger") {
+                iconSvg = React.createElement('svg', { 
+                    width: "24", 
+                    height: "24", 
+                    fill: "none", 
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor"
+                },
+                    React.createElement('path', { 
+                        strokeLinecap: "round", 
+                        strokeLinejoin: "round", 
+                        strokeWidth: "2", 
+                        d: "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                    })
+                );
+            } else if (type === "success") {
+                iconSvg = React.createElement('svg', { 
+                    width: "24", 
+                    height: "24", 
+                    fill: "none", 
+                    viewBox: "0 0 24 24",
+                    stroke: "currentColor"
+                },
+                    React.createElement('path', { 
+                        strokeLinecap: "round", 
+                        strokeLinejoin: "round", 
+                        strokeWidth: "2", 
+                        d: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" 
+                    })
+                );
+            }
+            
+            const confirmButtonClass = type === "success" ? "alert-button-success" : "alert-button-confirm";
+            
+            return React.createElement('div', { className: "alert-overlay" },
+                React.createElement('div', { className: "alert-box" },
+                    React.createElement('div', { className: iconClass }, iconSvg),
+                    React.createElement('h3', { className: "alert-title" }, title),
+                    React.createElement('p', { className: "alert-message" }, message),
+                    React.createElement('div', { className: "alert-buttons" },
+                        React.createElement('button', {
+                            className: "alert-button alert-button-cancel",
+                            onClick: onCancel
+                        }, cancelText),
+                        React.createElement('button', {
+                            className: `alert-button ${confirmButtonClass}`,
+                            onClick: onConfirm
+                        }, confirmText)
+                    )
+                )
+            );
+        }
+        
+        // Professional Dropdown Component
+        function Dropdown({ options, value, onChange, placeholder = "Select...", showIcons = false, dangerOptions = [] }) {
+            const [isOpen, setIsOpen] = useState(false);
+            const dropdownRef = useRef(null);
+            
+            useEffect(() => {
+                const handleClickOutside = (event) => {
+                    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                        setIsOpen(false);
+                    }
+                };
+                
+                document.addEventListener('mousedown', handleClickOutside);
+                return () => document.removeEventListener('mousedown', handleClickOutside);
+            }, []);
+            
+            const selectedOption = options.find(opt => opt.value === value);
+            
+            return React.createElement('div', { ref: dropdownRef, className: "dropdown-container" },
+                React.createElement('button', {
+                    className: "dropdown-button",
+                    onClick: () => setIsOpen(!isOpen)
+                },
+                    React.createElement('span', null, selectedOption ? selectedOption.label : placeholder),
+                    React.createElement('svg', { 
+                        width: "16", 
+                        height: "16", 
+                        fill: "none", 
+                        viewBox: "0 0 24 24",
+                        stroke: "currentColor",
+                        style: { transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }
+                    },
+                        React.createElement('path', { 
+                            strokeLinecap: "round", 
+                            strokeLinejoin: "round", 
+                            strokeWidth: "2", 
+                            d: "M19 9l-7 7-7-7" 
+                        })
+                    )
+                ),
+                isOpen && React.createElement('div', { className: "dropdown-menu" },
+                    options.map(option => {
+                        const isDanger = dangerOptions.includes(option.value);
+                        return React.createElement('div', {
+                            key: option.value,
+                            className: `dropdown-item ${isDanger ? 'danger' : ''}`,
+                            onClick: () => {
+                                onChange(option.value);
+                                setIsOpen(false);
+                            }
+                        },
+                            React.createElement('span', null, option.label),
+                            showIcons && option.icon && React.createElement('span', null, option.icon)
+                        );
+                    })
+                )
+            );
+        }
+        
+        // Enhanced Real Chart Component with Full Dynamic Updates
+        function RealChart({ chart, data, columns, onChartClick, isLinked, isLive, onDataUpdate, showLabels = true, showLegend = true, xAxisName, yAxisName }) {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+            const [animationKey, setAnimationKey] = useState(0);
+            
+            // Function to generate dynamic data updates
+            const updateChartData = useCallback(() => {
+                if (!chartInstance.current || !data.length) return;
+                
+                const updatedData = [...data];
+                
+                // Add some random variation to simulate live data
+                if (isLive && chart.type !== 'pie' && chart.type !== 'doughnut') {
+                    const randomUpdateIndex = Math.floor(Math.random() * updatedData.length);
+                    if (updatedData[randomUpdateIndex]) {
+                        const variation = 0.8 + (Math.random() * 0.4); // 0.8 to 1.2
+                        updatedData[randomUpdateIndex] = {
+                            ...updatedData[randomUpdateIndex],
+                            [chart.yAxis]: Math.round(updatedData[randomUpdateIndex][chart.yAxis] * variation)
+                        };
+                        
+                        // Trigger animation
+                        setAnimationKey(prev => prev + 1);
+                        
+                        // Notify parent component of data change
+                        if (onDataUpdate) {
+                            onDataUpdate(updatedData);
+                        }
+                    }
+                }
+            }, [data, chart.yAxis, chart.type, isLive, onDataUpdate]);
+            
+            // Set up live data updates
+            useEffect(() => {
+                if (!isLive) return;
+                
+                const interval = setInterval(updateChartData, 3000); // Update every 3 seconds
+                return () => clearInterval(interval);
+            }, [isLive, updateChartData]);
+            
+            useEffect(() => {
+                if (!chartRef.current || !data.length || !chart.xAxis || !chart.yAxis) {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                        chartInstance.current = null;
+                    }
+                    return;
+                }
+                
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+                
+                const ctx = chartRef.current.getContext('2d');
+                
+                // Prepare data based on chart type
+                let labels, datasets;
+                
+                if (chart.type === 'pie' || chart.type === 'doughnut' || chart.type === 'polarArea') {
+                    const groupedData = {};
+                    data.forEach(row => {
+                        const key = row[chart.xAxis];
+                        const value = parseFloat(row[chart.yAxis]) || 0;
+                        groupedData[key] = (groupedData[key] || 0) + value;
+                    });
+                    
+                    labels = Object.keys(groupedData);
+                    datasets = [{
+                        label: chart.yAxis,
+                        data: Object.values(groupedData),
+                        backgroundColor: COLOR_PALETTES[chart.colorPalette || 'default'].slice(0, labels.length),
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverBorderWidth: 3,
+                        hoverBorderColor: '#1e40af'
+                    }];
+                } else {
+                    labels = [...new Set(data.map(row => row[chart.xAxis]))];
+                    const values = labels.map(label => {
+                        const matchingRows = data.filter(r => r[chart.xAxis] === label);
+                        return matchingRows.reduce((sum, row) => sum + (parseFloat(row[chart.yAxis]) || 0), 0);
+                    });
+                    
+                    const colors = COLOR_PALETTES[chart.colorPalette || 'default'];
+                    datasets = [{
+                        label: chart.yAxis,
+                        data: values,
+                        backgroundColor: chart.type === 'bar' ? 
+                            colors.map(color => color + 'CC') : // Add transparency for bars
+                            `rgba(59, 130, 246, 0.1)`,
+                        borderColor: colors[0],
+                        borderWidth: 2,
+                        fill: chart.type === 'area',
+                        pointBackgroundColor: colors[0],
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointHoverBorderWidth: 3
+                    }];
+                }
+                
+                const chartConfig = {
+                    type: chart.type,
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeOutQuart'
+                        },
+                        interaction: {
+                            mode: 'nearest',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: showLegend,
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: chart.title + (isLive ? ' 🔴 LIVE' : '')
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#ffffff',
+                                bodyColor: '#ffffff',
+                                borderColor: '#3b82f6',
+                                borderWidth: 1,
+                                cornerRadius: 6,
+                                displayColors: true,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== undefined) {
+                                            label += new Intl.NumberFormat().format(context.parsed.y);
+                                        } else if (context.parsed.r !== undefined) {
+                                            label += new Intl.NumberFormat().format(context.parsed.r);
+                                        } else {
+                                            label += new Intl.NumberFormat().format(context.parsed);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: (chart.type !== 'pie' && chart.type !== 'doughnut' && chart.type !== 'polarArea') ? {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat().format(value);
+                                    }
+                                },
+                                title: {
+                                    display: !!yAxisName,
+                                    text: yAxisName || chart.yAxis
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                title: {
+                                    display: !!xAxisName,
+                                    text: xAxisName || chart.xAxis
+                                }
+                            }
+                        } : {},
+                        onClick: (event, elements) => {
+                            if (elements.length > 0 && onChartClick) {
+                                const elementIndex = elements[0].index;
+                                const clickedItem = labels[elementIndex];
+                                onChartClick(clickedItem);
+                            }
+                        },
+                        onHover: (event, elements) => {
+                            if (event.native) {
+                                const target = event.native.target;
+                                target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                            }
+                        }
+                    }
+                };
+                
+                chartInstance.current = new Chart(ctx, chartConfig);
+                
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [chart, data, animationKey, showLabels, showLegend, xAxisName, yAxisName]);
+            
+            if (!data.length || !chart.xAxis || !chart.yAxis) {
+                return React.createElement('div', {
+                    className: "flex items-center justify-center h-full text-gray-500"
+                }, "Configure chart axes to display data");
+            }
+            
+            return React.createElement('div', { className: "chart-container relative" },
+                isLinked && React.createElement('div', { 
+                    className: "absolute top-2 left-2 bg-blue-500 text-white px-2 py-1 rounded text-xs z-10"
+                }, "Linked"),
+                isLive && React.createElement('div', { 
+                    className: "absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs z-10 flex items-center"
+                },
+                    React.createElement('span', { className: "live-indicator" }),
+                    "LIVE"
+                ),
+                React.createElement('canvas', { 
+                    ref: chartRef,
+                    className: "chart-clickable"
+                })
+            );
+        }
+        
+        // Dynamic Controls Component
+        function DynamicControls({ chart, onToggleLive, onRandomizeData, onAddDataPoint }) {
+            return React.createElement('div', { className: "dynamic-controls" },
+                React.createElement('div', { className: "flex flex-wrap gap-2" },
+                    React.createElement('button', {
+                        onClick: onToggleLive,
+                        className: `px-3 py-1 rounded text-sm ${
+                            chart.isLive ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
+                        }`
+                    }, chart.isLive ? 'Stop Live Data' : 'Start Live Data'),
+                    
+                    React.createElement('button', {
+                        onClick: onRandomizeData,
+                        className: "px-3 py-1 bg-purple-500 text-white rounded text-sm"
+                    }, 'Randomize Data'),
+                    
+                    React.createElement('button', {
+                        onClick: onAddDataPoint,
+                        className: "px-3 py-1 bg-blue-500 text-white rounded text-sm"
+                    }, 'Add Data Point')
+                )
+            );
+        }
+        
+        // Data Editor Component
+        function DataEditor({ data, columns, onDataUpdate, onClose }) {
+            const [editedData, setEditedData] = useState([...data]);
+            
+            const updateCell = (rowIndex, column, value) => {
+                const newData = [...editedData];
+                newData[rowIndex] = {
+                    ...newData[rowIndex],
+                    [column]: value
+                };
+                setEditedData(newData);
+            };
+            
+            const saveChanges = () => {
+                onDataUpdate(editedData);
+                onClose();
+            };
+            
+            const addRow = () => {
+                const newRow = { id: Date.now() };
+                columns.forEach(col => {
+                    newRow[col] = '';
+                });
+                setEditedData([...editedData, newRow]);
+            };
+            
+            const deleteRow = (rowIndex) => {
+                const newData = editedData.filter((_, index) => index !== rowIndex);
+                setEditedData(newData);
+            };
+            
+            return React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" },
+                React.createElement('div', { className: "bg-white rounded-lg shadow-lg w-full max-w-6xl max-h-[90vh] flex flex-col" },
+                    React.createElement('div', { className: "flex justify-between items-center p-6 border-b" },
+                        React.createElement('h2', { className: "text-xl font-bold" }, "Edit Dataset"),
+                        React.createElement('button', {
+                            onClick: onClose,
+                            className: "text-gray-500 hover:text-gray-700"
+                        }, "✕")
+                    ),
+                    
+                    React.createElement('div', { className: "data-editor flex-1 p-6" },
+                        React.createElement('table', { className: "data-table w-full" },
+                            React.createElement('thead', null,
+                                React.createElement('tr', null,
+                                    React.createElement('th', null, "Actions"),
+                                    columns.map(col => 
+                                        React.createElement('th', { key: col }, col)
+                                    )
+                                )
+                            ),
+                            React.createElement('tbody', null,
+                                editedData.map((row, rowIndex) =>
+                                    React.createElement('tr', { key: row.id || rowIndex },
+                                        React.createElement('td', { className: "space-x-2" },
+                                            React.createElement('button', {
+                                                onClick: () => deleteRow(rowIndex),
+                                                className: "text-red-500 hover:text-red-700 text-sm"
+                                            }, "Delete")
+                                        ),
+                                        columns.map(col =>
+                                            React.createElement('td', { key: col },
+                                                React.createElement('input', {
+                                                    type: "text",
+                                                    value: row[col] || '',
+                                                    onChange: (e) => updateCell(rowIndex, col, e.target.value),
+                                                    className: "editable-cell"
+                                                })
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    
+                    React.createElement('div', { className: "flex justify-between items-center p-6 border-t bg-gray-50" },
+                        React.createElement('button', {
+                            onClick: addRow,
+                            className: "px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        }, "+ Add Row"),
+                        React.createElement('div', { className: "flex gap-2" },
+                            React.createElement('button', {
+                                onClick: onClose,
+                                className: "px-4 py-2 text-gray-600 hover:text-gray-800"
+                            }, "Cancel"),
+                            React.createElement('button', {
+                                onClick: saveChanges,
+                                className: "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            }, "Save Changes")
+                        )
+                    )
+                )
+            );
+        }
+        
+        // Professional Analysis Component
+        function ProfessionalAnalysis({ data }) {
+            if (!data || data.length === 0) {
+                return React.createElement('div', { className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6" },
+                    React.createElement('h2', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Professional Analysis"),
+                    React.createElement('div', { className: "text-gray-500" }, "No data available for analysis")
+                );
+            }
+            
+            // Calculate statistics for numeric columns
+            const numericColumns = Object.keys(data[0]).filter(key => {
+                return data.some(row => !isNaN(parseFloat(row[key])) && row[key] !== '');
+            });
+            
+            const calculateStats = (column) => {
+                const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
+                if (values.length === 0) return null;
+                
+                const sum = values.reduce((a, b) => a + b, 0);
+                const avg = sum / values.length;
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                
+                // Calculate median
+                const sorted = [...values].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+                const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+                
+                // Calculate standard deviation
+                const squareDiffs = values.map(value => Math.pow(value - avg, 2));
+                const avgSquareDiff = squareDiffs.reduce((a, b) => a + b, 0) / values.length;
+                const stdDev = Math.sqrt(avgSquareDiff);
+                
+                return {
+                    count: values.length,
+                    average: avg,
+                    min,
+                    max,
+                    median,
+                    stdDev
+                };
+            };
+            
+            return React.createElement('div', { className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6" },
+                React.createElement('h2', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Professional Analysis"),
+                React.createElement('div', { className: "overflow-x-auto" },
+                    React.createElement('table', { className: "analysis-table" },
+                        React.createElement('thead', null,
+                            React.createElement('tr', null,
+                                React.createElement('th', { className: "text-left" }, "Metric"),
+                                numericColumns.map(col => 
+                                    React.createElement('th', { key: col }, col)
+                                )
+                            )
+                        ),
+                        React.createElement('tbody', null,
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Count"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.count : "-");
+                                })
+                            ),
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Average"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.average.toFixed(2) : "-");
+                                })
+                            ),
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Min"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.min.toFixed(2) : "-");
+                                })
+                            ),
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Max"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.max.toFixed(2) : "-");
+                                })
+                            ),
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Median"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.median.toFixed(2) : "-");
+                                })
+                            ),
+                            React.createElement('tr', null,
+                                React.createElement('td', { className: "text-left font-medium" }, "Std Dev"),
+                                numericColumns.map(col => {
+                                    const stats = calculateStats(col);
+                                    return React.createElement('td', { key: col }, stats ? stats.stdDev.toFixed(2) : "-");
+                                })
+                            )
+                        )
+                    )
+                )
+            );
+        }
+        
+        // Report Page Component
+        function ReportPage({ pages, onBack }) {
+            const [reportCharts, setReportCharts] = useState([]);
+            const [recommendations, setRecommendations] = useState("");
+            const [chartSettings, setChartSettings] = useState({});
+            
+            // Collect all charts from all pages
+            useEffect(() => {
+                const allCharts = [];
+                pages.forEach(page => {
+                    if (page.charts) {
+                        page.charts.forEach(chart => {
+                            allCharts.push({
+                                ...chart,
+                                pageName: page.name,
+                                pageId: page.id
+                            });
+                        });
+                    }
+                });
+                setReportCharts(allCharts);
+                
+                // Initialize chart settings
+                const initialSettings = {};
+                allCharts.forEach(chart => {
+                    initialSettings[chart.id] = {
+                        showLabels: true,
+                        showLegend: true,
+                        xAxisName: chart.xAxis,
+                        yAxisName: chart.yAxis,
+                        includeInReport: true
+                    };
+                });
+                setChartSettings(initialSettings);
+            }, [pages]);
+            
+            const toggleChartInclusion = (chartId) => {
+                setChartSettings(prev => ({
+                    ...prev,
+                    [chartId]: {
+                        ...prev[chartId],
+                        includeInReport: !prev[chartId].includeInReport
+                    }
+                }));
+            };
+            
+            const updateChartSetting = (chartId, setting, value) => {
+                setChartSettings(prev => ({
+                    ...prev,
+                    [chartId]: {
+                        ...prev[chartId],
+                        [setting]: value
+                    }
+                }));
+            };
+            
+            const exportReport = () => {
+                const reportData = {
+                    charts: reportCharts.filter(chart => chartSettings[chart.id]?.includeInReport),
+                    recommendations: recommendations,
+                    generatedAt: new Date().toISOString()
+                };
+                
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "insights-report.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            };
+            
+            const printReport = () => {
+                window.print();
+            };
+            
+            return React.createElement('div', { className: "min-h-screen bg-white p-4 lg:p-6" },
+                React.createElement('div', { className: "max-w-7xl mx-auto" },
+                    // Header
+                    React.createElement('div', { className: "bg-white rounded-lg shadow-lg p-4 mb-6" },
+                        React.createElement('div', { className: "flex justify-between items-center" },
+                            React.createElement('h1', { className: "text-2xl font-bold text-gray-800" }, "Insights+ Report"),
+                            React.createElement('div', { className: "flex gap-2" },
+                                React.createElement('button', {
+                                    onClick: onBack,
+                                    className: "px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                }, "Back to Dashboard"),
+                                React.createElement('button', {
+                                    onClick: exportReport,
+                                    className: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                }, "Export Report"),
+                                React.createElement('button', {
+                                    onClick: printReport,
+                                    className: "px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                }, "Print Report")
+                            )
+                        )
+                    ),
+                    
+                    // Chart Selection
+                    React.createElement('div', { className: "bg-white rounded-lg shadow-lg p-6 mb-6" },
+                        React.createElement('h2', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Chart Selection"),
+                        React.createElement('div', { className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" },
+                            reportCharts.map(chart => 
+                                React.createElement('div', {
+                                    key: chart.id,
+                                    className: `border rounded-lg p-4 ${chartSettings[chart.id]?.includeInReport ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`
+                                },
+                                    React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                        React.createElement('h3', { className: "font-medium" }, chart.title),
+                                        React.createElement('input', {
+                                            type: "checkbox",
+                                            checked: chartSettings[chart.id]?.includeInReport || false,
+                                            onChange: () => toggleChartInclusion(chart.id),
+                                            className: "h-4 w-4 text-blue-600"
+                                        })
+                                    ),
+                                    React.createElement('p', { className: "text-sm text-gray-600 mb-2" }, `From: ${chart.pageName}`),
+                                    React.createElement('div', { className: "space-y-2 text-sm" },
+                                        React.createElement('div', { className: "flex items-center gap-2" },
+                                            React.createElement('input', {
+                                                type: "checkbox",
+                                                checked: chartSettings[chart.id]?.showLabels || false,
+                                                onChange: (e) => updateChartSetting(chart.id, 'showLabels', e.target.checked),
+                                                className: "h-3 w-3"
+                                            }),
+                                            React.createElement('span', null, "Show Labels")
+                                        ),
+                                        React.createElement('div', { className: "flex items-center gap-2" },
+                                            React.createElement('input', {
+                                                type: "checkbox",
+                                                checked: chartSettings[chart.id]?.showLegend || false,
+                                                onChange: (e) => updateChartSetting(chart.id, 'showLegend', e.target.checked),
+                                                className: "h-3 w-3"
+                                            }),
+                                            React.createElement('span', null, "Show Legend")
+                                        ),
+                                        React.createElement('div', null,
+                                            React.createElement('label', { className: "block text-xs text-gray-500" }, "X-Axis Name"),
+                                            React.createElement('input', {
+                                                type: "text",
+                                                value: chartSettings[chart.id]?.xAxisName || chart.xAxis,
+                                                onChange: (e) => updateChartSetting(chart.id, 'xAxisName', e.target.value),
+                                                className: "w-full p-1 border rounded text-xs"
+                                            })
+                                        ),
+                                        React.createElement('div', null,
+                                            React.createElement('label', { className: "block text-xs text-gray-500" }, "Y-Axis Name"),
+                                            React.createElement('input', {
+                                                type: "text",
+                                                value: chartSettings[chart.id]?.yAxisName || chart.yAxis,
+                                                onChange: (e) => updateChartSetting(chart.id, 'yAxisName', e.target.value),
+                                                className: "w-full p-1 border rounded text-xs"
+                                            })
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    
+                    // Report Content
+                    React.createElement('div', { className: "bg-white rounded-lg shadow-lg p-6 mb-6" },
+                        React.createElement('h2', { className: "text-xl font-semibold text-gray-800 mb-4" }, "Executive Summary"),
+                        
+                        // Selected Charts
+                        reportCharts
+                            .filter(chart => chartSettings[chart.id]?.includeInReport)
+                            .map(chart => {
+                                const page = pages.find(p => p.id === chart.pageId);
+                                const dataset = page ? page.datasets[page.activeDataset] : null;
+                                const data = dataset ? dataset.data : [];
+                                
+                                return React.createElement('div', {
+                                    key: chart.id,
+                                    className: "report-chart"
+                                },
+                                    React.createElement('h3', { className: "text-lg font-medium mb-2" }, chart.title),
+                                    React.createElement(RealChart, {
+                                        chart: chart,
+                                        data: data,
+                                        columns: dataset ? dataset.columns : [],
+                                        showLabels: chartSettings[chart.id]?.showLabels,
+                                        showLegend: chartSettings[chart.id]?.showLegend,
+                                        xAxisName: chartSettings[chart.id]?.xAxisName,
+                                        yAxisName: chartSettings[chart.id]?.yAxisName
+                                    })
+                                );
+                            }),
+                        
+                        // Recommendations
+                        React.createElement('div', { className: "mt-6" },
+                            React.createElement('h3', { className: "text-lg font-medium mb-2" }, "Recommendations & Insights"),
+                            React.createElement('textarea', {
+                                value: recommendations,
+                                onChange: (e) => setRecommendations(e.target.value),
+                                className: "w-full h-40 p-3 border rounded-lg",
+                                placeholder: "Enter your recommendations and insights based on the data analysis..."
+                            })
+                        )
+                    )
+                )
+            );
+        }
+        
+        // Main Dashboard Component
+        function Dashboard() {
+            const [currentPage, setCurrentPage] = useState(0);
+            const [pages, setPages] = useState([
+                {
+                    id: 1,
+                    name: 'Dynamic Dashboard',
+                    datasets: {
+                        primary: {
+                            name: 'Time Series Data',
+                            data: generateSampleData(),
+                            columns: ['category', 'product', 'sales', 'revenue', 'profit', 'region', 'quarter', 'month', 'year', 'timestamp'],
+                            filters: {},
+                            quickFilters: {}
+                        }
+                    },
+                    activeDataset: 'primary',
+                    charts: [
+                        {
+                            id: 1,
+                            type: 'line',
+                            title: 'Sales Over Time',
+                            xAxis: 'month',
+                            yAxis: 'sales',
+                            colorPalette: 'default',
+                            selectedItem: null,
+                            isLinked: true,
+                            isLive: true
+                        },
+                        {
+                            id: 2,
+                            type: 'bar',
+                            title: 'Revenue by Product',
+                            xAxis: 'product',
+                            yAxis: 'revenue',
+                            colorPalette: 'ocean',
+                            selectedItem: null,
+                            isLinked: true,
+                            isLive: false
+                        }
+                    ],
+                    cards: [
+                        {
+                            id: 1,
+                            title: 'Total Products',
+                            calculation: 'distinct_count',
+                            column1: 'product',
+                            linkedChartId: 1,
+                            isEditing: false
+                        },
+                        {
+                            id: 2,
+                            title: 'Total Sales',
+                            calculation: 'sum',
+                            column1: 'sales',
+                            linkedChartId: 1,
+                            isEditing: false
+                        },
+                        {
+                            id: 3,
+                            title: 'Average Revenue',
+                            calculation: 'avg',
+                            column1: 'revenue',
+                            linkedChartId: 2,
+                            isEditing: false
+                        },
+                        {
+                            id: 4,
+                            title: 'Max Profit',
+                            calculation: 'max',
+                            column1: 'profit',
+                            linkedChartId: 2,
+                            isEditing: false
+                        }
+                    ],
+                    globalFilter: null
+                }
+            ]);
+            
+            const [showDataUpload, setShowDataUpload] = useState(false);
+            const [showDataEditor, setShowDataEditor] = useState(false);
+            const [showCardModal, setShowCardModal] = useState(false);
+            const [showColorPalette, setShowColorPalette] = useState(false);
+            const [showHistory, setShowHistory] = useState(false);
+            const [showReport, setShowReport] = useState(false);
+            const [projectHistory, setProjectHistory] = useState([]);
+            const [newCard, setNewCard] = useState({ title: '', calculation: 'sum', column1: '', linkedChartId: '' });
+            const [editingPageName, setEditingPageName] = useState(null);
+            const [pageNameInput, setPageNameInput] = useState('');
+            const [selectedCard, setSelectedCard] = useState(null);
+            const [backgroundClass, setBackgroundClass] = useState('gradient-bg-1 gradient-bg');
+            const [alertConfig, setAlertConfig] = useState({ show: false, type: "warning", title: "", message: "", onConfirm: null, confirmText: "Confirm", cancelText: "Cancel" });
+            const [isLoading, setIsLoading] = useState(false);
+            const [mobileNavOpen, setMobileNavOpen] = useState(false);
+            
+            // Show custom alert
+            const showAlert = (type, title, message, onConfirm, confirmText = "Confirm", cancelText = "Cancel") => {
+                setAlertConfig({ show: true, type, title, message, onConfirm, confirmText, cancelText });
+            };
+            
+            // Hide alert
+            const hideAlert = () => {
+                setAlertConfig({ show: false, type: "warning", title: "", message: "", onConfirm: null, confirmText: "Confirm", cancelText: "Cancel" });
+            };
+            
+            // Toggle mobile navigation
+            const toggleMobileNav = () => {
+                setMobileNavOpen(!mobileNavOpen);
+            };
+            
+            // Get current page data with all filters applied
+            const getCurrentPageData = useCallback(() => {
+                const page = pages[currentPage];
+                if (!page || !page.datasets) return { data: [], columns: [] };
+                
+                const dataset = page.datasets[page.activeDataset];
+                if (!dataset) return { data: [], columns: [] };
+                
+                return { 
+                    data: dataset.data, 
+                    columns: dataset.columns, 
+                    originalData: dataset.data 
+                };
+            }, [pages, currentPage]);
+            
+            // Add a new page - Optimized
+            const addPage = useCallback(() => {
+                const newPage = {
+                    id: Date.now(),
+                    name: `Analysis ${pages.length + 1}`,
+                    datasets: {
+                        primary: {
+                            name: 'New Dataset',
+                            data: generateSampleData(),
+                            columns: ['category', 'product', 'sales', 'revenue', 'profit', 'region', 'quarter', 'month', 'year', 'timestamp'],
+                            filters: {},
+                            quickFilters: {}
+                        }
+                    },
+                    activeDataset: 'primary',
+                    charts: [],
+                    cards: [],
+                    globalFilter: null
+                };
+                setPages(prevPages => [...prevPages, newPage]);
+                setCurrentPage(pages.length);
+            }, [pages.length]);
+            
+            // Update dataset data
+            const updateDatasetData = useCallback((newData) => {
+                const updatedPages = [...pages];
+                const dataset = updatedPages[currentPage].datasets[updatedPages[currentPage].activeDataset];
+                dataset.data = newData;
+                setPages(updatedPages);
+            }, [pages, currentPage]);
+            
+            // Update specific chart data
+            const updateChartData = useCallback((chartId, newData) => {
+                const updatedPages = [...pages];
+                const dataset = updatedPages[currentPage].datasets[updatedPages[currentPage].activeDataset];
+                dataset.data = newData;
+                setPages(updatedPages);
+            }, [pages, currentPage]);
+            
+            // Refresh data (reload from source if needed)
+            const refreshData = useCallback(() => {
+                // In a real app, this would reload from the original source
+                // For now, we'll just trigger a re-render
+                setPages([...pages]);
+            }, [pages]);
+            
+            // Delete current page
+            const deleteCurrentPage = () => {
+                if (pages.length <= 1) {
+                    showAlert("warning", "Cannot Delete Page", "You cannot delete the only page in your project.", null);
+                    return;
+                }
+                
+                showAlert("warning", "Delete Page", "Are you sure you want to delete this page? This action cannot be undone.", () => {
+                    const updatedPages = pages.filter((_, index) => index !== currentPage);
+                    setPages(updatedPages);
+                    setCurrentPage(Math.min(currentPage, updatedPages.length - 1));
+                    hideAlert();
+                }, "Delete", "Cancel");
+            };
+            
+            // Remove dataset from page
+            const removeDataset = (datasetKey) => {
+                const updatedPages = [...pages];
+                const page = updatedPages[currentPage];
+                
+                // Don't allow removing the last dataset
+                if (Object.keys(page.datasets).length <= 1) {
+                    showAlert("warning", "Cannot Remove Dataset", "You cannot remove the only dataset from a page.", null);
+                    return;
+                }
+                
+                showAlert("warning", "Remove Dataset", "Are you sure you want to remove this dataset? This action cannot be undone.", () => {
+                    delete updatedPages[currentPage].datasets[datasetKey];
+                    
+                    // If the active dataset was removed, switch to another one
+                    if (updatedPages[currentPage].activeDataset === datasetKey) {
+                        const remainingDatasets = Object.keys(updatedPages[currentPage].datasets);
+                        if (remainingDatasets.length > 0) {
+                            updatedPages[currentPage].activeDataset = remainingDatasets[0];
+                        }
+                    }
+                    
+                    setPages(updatedPages);
+                    hideAlert();
+                }, "Remove", "Cancel");
+            };
+            
+            // Rename page
+            const renamePage = (pageIndex, newName) => {
+                if (!newName.trim()) return;
+                const updatedPages = [...pages];
+                updatedPages[pageIndex].name = newName;
+                setPages(updatedPages);
+                setEditingPageName(null);
+            };
+            
+            // Add a new chart
+            const addChart = () => {
+                const { columns } = getCurrentPageData();
+                
+                const newChart = {
+                    id: Date.now(),
+                    type: 'bar',
+                    title: 'New Dynamic Chart',
+                    xAxis: columns[0] || '',
+                    yAxis: columns[0] || '', // Same as x-axis initially
+                    colorPalette: 'default',
+                    selectedItem: null,
+                    isLinked: true,
+                    isLive: false
+                };
+                
+                const updatedPages = [...pages];
+                if (!updatedPages[currentPage].charts) {
+                    updatedPages[currentPage].charts = [];
+                }
+                updatedPages[currentPage].charts.push(newChart);
+                setPages(updatedPages);
+            };
+            
+            // Handle chart click
+            const handleChartClick = (chartId, item) => {
+                const updatedPages = [...pages];
+                const page = updatedPages[currentPage];
+                const chartIndex = page.charts.findIndex(c => c.id === chartId);
+                
+                if (page.charts[chartIndex].selectedItem === item) {
+                    page.charts[chartIndex].selectedItem = null;
+                    setSelectedCard(null);
+                } else {
+                    page.charts[chartIndex].selectedItem = item;
+                    setSelectedCard(chartId);
+                }
+                
+                setPages(updatedPages);
+            };
+            
+            // Toggle live data for a chart
+            const toggleChartLive = (chartId) => {
+                const updatedPages = [...pages];
+                const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chartId);
+                if (chartIndex !== -1) {
+                    updatedPages[currentPage].charts[chartIndex].isLive = 
+                        !updatedPages[currentPage].charts[chartIndex].isLive;
+                    setPages(updatedPages);
+                }
+            };
+            
+            // Randomize data for a chart
+            const randomizeChartData = (chartId) => {
+                const { data } = getCurrentPageData();
+                const updatedData = data.map(item => ({
+                    ...item,
+                    sales: Math.round(item.sales * (0.5 + Math.random())),
+                    revenue: Math.round(item.revenue * (0.5 + Math.random())),
+                    profit: Math.round(item.profit * (0.5 + Math.random()))
+                }));
+                
+                updateDatasetData(updatedData);
+            };
+            
+            // Add a new data point
+            const addDataPoint = (chartId) => {
+                const { data, columns } = getCurrentPageData();
+                const lastItem = data[data.length - 1];
+                const newItem = { ...lastItem };
+                
+                // Create a new item with incremented values
+                newItem.id = Date.now();
+                newItem.sales = Math.round(newItem.sales * (0.8 + Math.random() * 0.4));
+                newItem.revenue = Math.round(newItem.revenue * (0.8 + Math.random() * 0.4));
+                newItem.profit = Math.round(newItem.profit * (0.8 + Math.random() * 0.4));
+                
+                // If we have a timestamp, increment it
+                if (newItem.timestamp) {
+                    newItem.timestamp += 24 * 60 * 60 * 1000; // Add one day
+                    const date = new Date(newItem.timestamp);
+                    newItem.month = date.toLocaleString('default', { month: 'short' });
+                }
+                
+                const updatedData = [...data, newItem];
+                updateDatasetData(updatedData);
+            };
+            
+            // Add a new card
+            const addCard = () => {
+                if (!newCard.title || !newCard.column1) {
+                    showAlert("warning", "Missing Information", "Please fill in all required fields.", null);
+                    return;
+                }
+                
+                const updatedPages = [...pages];
+                if (!updatedPages[currentPage].cards) {
+                    updatedPages[currentPage].cards = [];
+                }
+                updatedPages[currentPage].cards.push({
+                    id: Date.now(),
+                    ...newCard,
+                    isEditing: false
+                });
+                setPages(updatedPages);
+                setNewCard({ title: '', calculation: 'sum', column1: '', linkedChartId: '' });
+                setShowCardModal(false);
+            };
+            
+            // Edit card
+            const editCard = (cardId, field, value) => {
+                const updatedPages = [...pages];
+                const cardIndex = updatedPages[currentPage].cards.findIndex(c => c.id === cardId);
+                if (cardIndex !== -1) {
+                    updatedPages[currentPage].cards[cardIndex][field] = value;
+                    setPages(updatedPages);
+                }
+            };
+            
+            // Toggle card editing
+            const toggleCardEditing = (cardId) => {
+                const updatedPages = [...pages];
+                const cardIndex = updatedPages[currentPage].cards.findIndex(c => c.id === cardId);
+                if (cardIndex !== -1) {
+                    updatedPages[currentPage].cards[cardIndex].isEditing = !updatedPages[currentPage].cards[cardIndex].isEditing;
+                    setPages(updatedPages);
+                }
+            };
+            
+            // Remove card
+            const removeCard = (cardId) => {
+                showAlert("warning", "Delete Card", "Are you sure you want to delete this card? This action cannot be undone.", () => {
+                    const updatedPages = [...pages];
+                    updatedPages[currentPage].cards = updatedPages[currentPage].cards.filter(card => card.id !== cardId);
+                    setPages(updatedPages);
+                    hideAlert();
+                }, "Delete", "Cancel");
+            };
+            
+            // Remove chart
+            const removeChart = (chartId) => {
+                showAlert("warning", "Delete Chart", "Are you sure you want to delete this chart? This action cannot be undone.", () => {
+                    const updatedPages = [...pages];
+                    updatedPages[currentPage].charts = updatedPages[currentPage].charts.filter(chart => chart.id !== chartId);
+                    setPages(updatedPages);
+                    hideAlert();
+                }, "Delete", "Cancel");
+            };
+            
+            // Handle file upload - Optimized
+            const handleFileUpload = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                setIsLoading(true);
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        let newData, newColumns;
+                        
+                        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, { type: 'array' });
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                            
+                            if (jsonData.length === 0) {
+                                showAlert("warning", "No Data Found", "No data found in the selected file.", null);
+                                setIsLoading(false);
+                                return;
+                            }
+                            
+                            newColumns = jsonData[0];
+                            newData = jsonData.slice(1).map((row, index) => {
+                                const rowObj = { id: index + 1 };
+                                newColumns.forEach((header, i) => {
+                                    const value = row[i] || '';
+                                    rowObj[header] = value;
+                                });
+                                return rowObj;
+                            });
+                        } else {
+                            const text = e.target.result;
+                            const lines = text.split('\n').filter(line => line.trim());
+                            if (lines.length === 0) {
+                                showAlert("warning", "No Data Found", "No data found in the selected file.", null);
+                                setIsLoading(false);
+                                return;
+                            }
+                            
+                            newColumns = lines[0].split(',').map(h => h.trim());
+                            newData = lines.slice(1).map((line, index) => {
+                                const values = line.split(',').map(v => v.trim());
+                                const row = { id: index + 1 };
+                                newColumns.forEach((header, i) => {
+                                    row[header] = values[i] || '';
+                                });
+                                return row;
+                            });
+                        }
+                        
+                        const datasetName = file.name.replace(/\.[^/.]+$/, "");
+                        const datasetKey = `dataset-${Date.now()}`;
+                        
+                        const updatedPages = [...pages];
+                        if (!updatedPages[currentPage].datasets) {
+                            updatedPages[currentPage].datasets = {};
+                        }
+                        updatedPages[currentPage].datasets[datasetKey] = {
+                            name: datasetName,
+                            data: newData,
+                            columns: newColumns,
+                            filters: {},
+                            quickFilters: {}
+                        };
+                        updatedPages[currentPage].activeDataset = datasetKey;
+                        
+                        // Update chart axes to use available columns
+                        updatedPages[currentPage].charts.forEach(chart => {
+                            if (!newColumns.includes(chart.xAxis)) {
+                                chart.xAxis = newColumns[0] || '';
+                            }
+                            if (!newColumns.includes(chart.yAxis)) {
+                                chart.yAxis = newColumns[0] || '';
+                            }
+                        });
+                        
+                        setPages(updatedPages);
+                        setShowDataUpload(false);
+                        setIsLoading(false);
+                        
+                    } catch (error) {
+                        showAlert("danger", "Error Parsing File", 'Error parsing file: ' + error.message, null);
+                        setIsLoading(false);
+                    }
+                };
+                
+                if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            };
+            
+            // Calculate card value
+            const calculateValue = (calculation, column, linkedChartId) => {
+                let { data } = getCurrentPageData();
+                
+                if (linkedChartId && selectedCard === linkedChartId) {
+                    const chart = pages[currentPage].charts.find(c => c.id === linkedChartId);
+                    if (chart && chart.selectedItem) {
+                        data = data.filter(row => 
+                            String(row[chart.xAxis]) === String(chart.selectedItem)
+                        );
+                    }
+                }
+                
+                if (!data.length || !column) return 0;
+                
+                const values = data.map(row => {
+                    const val = row[column];
+                    return typeof val === 'number' ? val : parseFloat(val) || 0;
+                }).filter(val => !isNaN(val));
+                
+                if (!values.length) return 0;
+                
+                switch(calculation) {
+                    case 'count': return data.length;
+                    case 'sum': return values.reduce((a, b) => a + b, 0);
+                    case 'avg': return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
+                    case 'min': return Math.min(...values);
+                    case 'max': return Math.max(...values);
+                    case 'distinct_count': return new Set(data.map(row => row[column])).size;
+                    case 'distinct_sum': 
+                        const distinctValues = [...new Set(data.map(row => row[column]))];
+                        return distinctValues.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0);
+                    default: return values.reduce((a, b) => a + b, 0);
+                }
+            };
+            
+            // Apply color palette to charts
+            const applyColorPalette = (paletteName) => {
+                const updatedPages = [...pages];
+                updatedPages[currentPage].charts.forEach(chart => {
+                    chart.colorPalette = paletteName;
+                });
+                setPages(updatedPages);
+                setShowColorPalette(false);
+            };
+            
+            // Change background color
+            const changeBackground = () => {
+                const currentIndex = BACKGROUND_GRADIENTS.findIndex(bg => backgroundClass.includes(bg));
+                const nextIndex = (currentIndex + 1) % BACKGROUND_GRADIENTS.length;
+                setBackgroundClass(`${BACKGROUND_GRADIENTS[nextIndex]} gradient-bg`);
+            };
+            
+            // Save project to history
+            const saveProject = () => {
+                const projectName = prompt('Enter project name:');
+                if (!projectName) return;
+                
+                const project = {
+                    id: Date.now(),
+                    name: projectName,
+                    pages: pages,
+                    createdAt: new Date().toISOString()
+                };
+                
+                const history = [...projectHistory, project];
+                setProjectHistory(history);
+                localStorage.setItem('insights-history', JSON.stringify(history));
+                showAlert("success", "Project Saved", "Project saved successfully!", null, "OK");
+            };
+            
+            // Load project from history
+            const loadProject = (project) => {
+                setPages(project.pages);
+                setCurrentPage(0);
+                setShowHistory(false);
+            };
+            
+            // Delete project from history
+            const deleteProject = (projectId) => {
+                showAlert("warning", "Delete Project", "Are you sure you want to delete this project? This action cannot be undone.", () => {
+                    const updatedHistory = projectHistory.filter(project => project.id !== projectId);
+                    setProjectHistory(updatedHistory);
+                    localStorage.setItem('insights-history', JSON.stringify(updatedHistory));
+                    hideAlert();
+                }, "Delete", "Cancel");
+            };
+            
+            // Load history from localStorage on component mount
+            useEffect(() => {
+                const savedHistory = localStorage.getItem('insights-history');
+                if (savedHistory) {
+                    setProjectHistory(JSON.parse(savedHistory));
+                }
+            }, []);
+            
+            const currentPageData = pages[currentPage] || { charts: [], cards: [], datasets: {} };
+            const { data, columns } = getCurrentPageData();
+            const datasets = currentPageData.datasets || {};
+            const currentDataset = datasets[currentPageData.activeDataset];
+            
+            // File Upload Modal
+            function FileUploadModal() {
+                const fileInputRef = useRef(null);
+                const [isDragging, setIsDragging] = useState(false);
+                
+                const handleDragOver = (e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                };
+                
+                const handleDragLeave = (e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                };
+                
+                const handleDrop = (e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        handleFileUpload({ target: { files: [files[0]] } });
+                    }
+                };
+                
+                return React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                },
+                    React.createElement('div', {
+                        className: "bg-white rounded-lg p-6 max-w-md w-full mx-4"
+                    },
+                        React.createElement('h2', { className: "text-xl font-bold mb-4" }, "Upload Data File"),
+                        
+                        React.createElement('div', {
+                            className: `file-upload-area ${isDragging ? 'border-blue-500 bg-blue-50' : ''}`,
+                            onDragOver: handleDragOver,
+                            onDragLeave: handleDragLeave,
+                            onDrop: handleDrop,
+                            onClick: () => fileInputRef.current?.click()
+                        },
+                            React.createElement('div', { className: "text-lg font-medium mb-2" }, "Drop file here or click to browse"),
+                            React.createElement('div', { className: "text-sm text-gray-500" }, "Supports CSV and Excel files")
+                        ),
+                        
+                        React.createElement('input', {
+                            ref: fileInputRef,
+                            type: "file",
+                            accept: ".csv,.xlsx,.xls",
+                            onChange: handleFileUpload,
+                            className: "hidden"
+                        }),
+                        
+                        React.createElement('button', {
+                            onClick: () => setShowDataUpload(false),
+                            className: "w-full mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                        }, "Cancel")
+                    )
+                );
+            }
+            
+            // Card Configuration Modal
+            function CardConfigModal() {
+                const { columns } = getCurrentPageData();
+                const currentCharts = pages[currentPage].charts || [];
+                
+                return React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                },
+                    React.createElement('div', {
+                        className: "bg-white rounded-lg p-6 max-w-md w-full mx-4"
+                    },
+                        React.createElement('h2', { className: "text-xl font-bold mb-4" }, "Add New Card"),
+                        
+                        React.createElement('div', { className: "space-y-4" },
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-medium mb-1" }, "Card Title"),
+                                React.createElement('input', {
+                                    type: "text",
+                                    value: newCard.title,
+                                    onChange: (e) => setNewCard({...newCard, title: e.target.value}),
+                                    className: "w-full p-2 border border-gray-300 rounded",
+                                    placeholder: "Enter card title"
+                                })
+                            ),
+                            
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-medium mb-1" }, "Calculation"),
+                                React.createElement(Dropdown, {
+                                    options: CALCULATION_TYPES,
+                                    value: newCard.calculation,
+                                    onChange: (value) => setNewCard({...newCard, calculation: value})
+                                })
+                            ),
+                            
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-medium mb-1" }, "Column"),
+                                React.createElement(Dropdown, {
+                                    options: columns.map(col => ({ value: col, label: col })),
+                                    value: newCard.column1,
+                                    onChange: (value) => setNewCard({...newCard, column1: value}),
+                                    placeholder: "Select column"
+                                })
+                            ),
+                            
+                            React.createElement('div', null,
+                                React.createElement('label', { className: "block text-sm font-medium mb-1" }, "Link to Chart (Optional)"),
+                                React.createElement(Dropdown, {
+                                    options: [
+                                        { value: '', label: 'No Link' },
+                                        ...currentCharts.map(chart => ({ value: chart.id, label: chart.title }))
+                                    ],
+                                    value: newCard.linkedChartId,
+                                    onChange: (value) => setNewCard({...newCard, linkedChartId: value})
+                                })
+                            ),
+                            
+                            React.createElement('div', { className: "flex justify-end gap-2" },
+                                React.createElement('button', {
+                                    onClick: () => setShowCardModal(false),
+                                    className: "px-4 py-2 text-gray-600 hover:text-gray-800"
+                                }, "Cancel"),
+                                React.createElement('button', {
+                                    onClick: addCard,
+                                    className: "px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                }, "Create Card")
+                            )
+                        )
+                    )
+                );
+            }
+            
+            // Color Palette Modal
+            function ColorPaletteModal() {
+                return React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                },
+                    React.createElement('div', {
+                        className: "bg-white rounded-lg p-6 max-w-2xl w-full mx-4"
+                    },
+                        React.createElement('h2', { className: "text-xl font-bold mb-4" }, "Choose Color Palette"),
+                        React.createElement('div', { className: "grid grid-cols-2 md:grid-cols-4 gap-4" },
+                            Object.entries(COLOR_PALETTES).map(([name, colors]) =>
+                                React.createElement('div', { 
+                                    key: name,
+                                    className: "text-center cursor-pointer border-2 border-gray-200 rounded-lg p-4 hover:border-blue-400",
+                                    onClick: () => applyColorPalette(name)
+                                },
+                                    React.createElement('div', { className: "mb-2 capitalize font-medium" }, name),
+                                    React.createElement('div', { className: "flex rounded-lg overflow-hidden" },
+                                        colors.map((color, index) =>
+                                            React.createElement('div', {
+                                                key: index,
+                                                className: "h-8 flex-1",
+                                                style: { backgroundColor: color }
+                                            })
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        React.createElement('button', {
+                            onClick: () => setShowColorPalette(false),
+                            className: "w-full mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                        }, "Close")
+                    )
+                );
+            }
+            
+            // History Modal
+            function HistoryModal() {
+                return React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+                },
+                    React.createElement('div', {
+                        className: "bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-96 overflow-y-auto"
+                    },
+                        React.createElement('h2', { className: "text-xl font-bold mb-4" }, "Project History"),
+                        projectHistory.length === 0 ? 
+                            React.createElement('div', { className: "text-center py-8 text-gray-500" },
+                                "No saved projects yet"
+                            ) :
+                            React.createElement('div', { className: "grid grid-cols-1 gap-4" },
+                                projectHistory.map(project => 
+                                    React.createElement('div', { 
+                                        key: project.id,
+                                        className: "border rounded-lg p-4"
+                                    },
+                                        React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                            React.createElement('h3', { className: "font-semibold" }, project.name),
+                                            React.createElement('div', { className: "flex gap-2" },
+                                                React.createElement('button', {
+                                                    onClick: () => loadProject(project),
+                                                    className: "px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                                }, "Load"),
+                                                React.createElement('button', {
+                                                    onClick: () => deleteProject(project.id),
+                                                    className: "px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                                                }, "Delete")
+                                            )
+                                        ),
+                                        React.createElement('p', { className: "text-sm text-gray-600" }, 
+                                            `Created: ${new Date(project.createdAt).toLocaleString()}`
+                                        )
+                                    )
+                                )
+                            ),
+                        React.createElement('button', {
+                            onClick: () => setShowHistory(false),
+                            className: "w-full mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                        }, "Close")
+                    )
+                );
+            }
+            
+            // If we're in report mode, show the report page
+            if (showReport) {
+                return React.createElement(ReportPage, {
+                    pages: pages,
+                    onBack: () => setShowReport(false)
+                });
+            }
+            
+            return React.createElement('div', { className: `min-h-screen ${backgroundClass} p-4 lg:p-6` },
+                React.createElement(Alert, {
+                    show: alertConfig.show,
+                    type: alertConfig.type,
+                    title: alertConfig.title,
+                    message: alertConfig.message,
+                    onConfirm: alertConfig.onConfirm,
+                    onCancel: hideAlert,
+                    confirmText: alertConfig.confirmText,
+                    cancelText: alertConfig.cancelText
+                }),
+                
+                React.createElement('div', { className: "max-w-7xl mx-auto" },
+                    
+                    // Navigation
+                    React.createElement('div', { className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-4 mb-6 relative" },
+                        React.createElement('div', { className: "flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4" },
+                            React.createElement('div', { className: "flex flex-col lg:flex-row items-start lg:items-center gap-4" },
+                                React.createElement('h1', { className: "text-2xl font-bold text-gray-800" }, "Insights+"),
+                                
+                                // Mobile Navigation Button
+                                React.createElement('button', {
+                                    className: "mobile-nav-button lg:hidden px-3 py-1 bg-blue-500 text-white rounded",
+                                    onClick: toggleMobileNav
+                                }, "☰"),
+                                
+                                // Page Tabs
+                                React.createElement('div', { className: "flex flex-wrap gap-2" },
+                                    pages.map((page, index) =>
+                                        editingPageName === index ? 
+                                            React.createElement('div', { key: page.id, className: "flex items-center gap-1" },
+                                                React.createElement('input', {
+                                                    type: "text",
+                                                    value: pageNameInput,
+                                                    onChange: (e) => setPageNameInput(e.target.value),
+                                                    onKeyDown: (e) => {
+                                                        if (e.key === 'Enter') renamePage(index, pageNameInput);
+                                                        if (e.key === 'Escape') setEditingPageName(null);
+                                                    },
+                                                    className: "px-2 py-1 border rounded text-sm",
+                                                    autoFocus: true
+                                                }),
+                                                React.createElement('button', {
+                                                    onClick: () => renamePage(index, pageNameInput),
+                                                    className: "text-green-500 hover:text-green-700"
+                                                }, "✓"),
+                                                React.createElement('button', {
+                                                    onClick: () => setEditingPageName(null),
+                                                    className: "text-red-500 hover:text-red-700"
+                                                }, "✕")
+                                            ) :
+                                            React.createElement('div', { key: page.id, className: "flex items-center gap-1" },
+                                                React.createElement('button', {
+                                                    className: `px-3 py-1 rounded-lg ${
+                                                        currentPage === index ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                                                    }`,
+                                                    onClick: () => setCurrentPage(index)
+                                                }, page.name),
+                                                pages.length > 1 && React.createElement('button', {
+                                                    onClick: (e) => {
+                                                        e.stopPropagation();
+                                                        setEditingPageName(index);
+                                                        setPageNameInput(page.name);
+                                                    },
+                                                    className: "text-gray-500 hover:text-gray-700"
+                                                }, "✎")
+                                            )
+                                    ),
+                                    React.createElement('button', {
+                                        onClick: addPage,
+                                        className: "px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                    }, "+ Page"),
+                                    pages.length > 1 && React.createElement('button', {
+                                        onClick: deleteCurrentPage,
+                                        className: "px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                                    }, "Delete Page")
+                                )
+                            ),
+                            
+                            // Navigation Menu (Desktop and Mobile)
+                            React.createElement('div', { 
+                                className: `nav-menu ${mobileNavOpen ? 'open' : ''} lg:flex flex-col lg:flex-row gap-3 flex-wrap`
+                            },
+                                // Dataset Selector with remove option
+                                currentDataset && React.createElement(Dropdown, {
+                                    options: Object.entries(datasets).map(([key, dataset]) => ({
+                                        value: key,
+                                        label: dataset.name
+                                    })),
+                                    value: currentPageData.activeDataset,
+                                    onChange: (value) => {
+                                        const updatedPages = [...pages];
+                                        updatedPages[currentPage].activeDataset = value;
+                                        setPages(updatedPages);
+                                    },
+                                    dangerOptions: Object.keys(datasets).filter(key => key !== currentPageData.activeDataset)
+                                }),
+                                
+                                React.createElement('button', {
+                                    onClick: () => setShowDataUpload(true),
+                                    className: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                                }, "Upload Data"),
+                                
+                                React.createElement('button', {
+                                    onClick: () => setShowDataEditor(true),
+                                    className: "px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600"
+                                }, "Edit Data"),
+                                
+                                React.createElement('button', {
+                                    onClick: refreshData,
+                                    className: "px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                                }, "Refresh"),
+                                
+                                React.createElement('button', {
+                                    onClick: () => setShowColorPalette(true),
+                                    className: "px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+                                }, "Colors"),
+                                
+                                React.createElement('button', {
+                                    onClick: () => setShowHistory(true),
+                                    className: "px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600"
+                                }, "History"),
+                                
+                                React.createElement('button', {
+                                    onClick: saveProject,
+                                    className: "px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+                                }, "Save Project"),
+                                
+                                React.createElement('button', {
+                                    onClick: changeBackground,
+                                    className: "px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                                }, "Change BG"),
+                                
+                                React.createElement('button', {
+                                    onClick: () => setShowReport(true),
+                                    className: "px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600"
+                                }, "Generate Report")
+                            )
+                        ),
+                        
+                        // Dataset info with remove buttons
+                        currentDataset && React.createElement('div', { className: "mt-4 text-sm text-gray-600" },
+                            React.createElement('div', { className: "flex flex-wrap items-center" },
+                                React.createElement('span', { className: "mr-2" }, "Active Datasets:"),
+                                Object.entries(datasets).map(([key, dataset]) =>
+                                    React.createElement('div', { 
+                                        key: key,
+                                        className: `dataset-badge ${key === currentPageData.activeDataset ? 'bg-blue-100 text-blue-800' : ''}`
+                                    },
+                                        dataset.name,
+                                        Object.keys(datasets).length > 1 && React.createElement('button', {
+                                            onClick: () => removeDataset(key),
+                                            title: "Remove dataset"
+                                        }, "×")
+                                    )
+                                )
+                            ),
+                            React.createElement('div', { className: "mt-1" },
+                                `Active Dataset: ${currentDataset.name} (${data.length} rows)`
+                            )
+                        )
+                    ),
+                    
+                    // Loading Spinner
+                    isLoading && React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" },
+                        React.createElement('div', { className: "bg-white rounded-lg p-6 flex flex-col items-center" },
+                            React.createElement('div', { className: "spinner mb-4" }),
+                            React.createElement('p', { className: "text-gray-700" }, "Processing...")
+                        )
+                    ),
+                    
+                    // Modals
+                    showDataUpload && React.createElement(FileUploadModal),
+                    showDataEditor && React.createElement(DataEditor, {
+                        data: data,
+                        columns: columns,
+                        onDataUpdate: updateDatasetData,
+                        onClose: () => setShowDataEditor(false)
+                    }),
+                    showCardModal && React.createElement(CardConfigModal),
+                    showColorPalette && React.createElement(ColorPaletteModal),
+                    showHistory && React.createElement(HistoryModal),
+                    
+                    // Professional Analysis
+                    React.createElement(ProfessionalAnalysis, { data: data }),
+                    
+                    // Analytics Cards
+                    React.createElement('div', { className: "mb-6" },
+                        React.createElement('div', { className: "flex justify-between items-center mb-4" },
+                            React.createElement('h2', { className: "text-xl font-semibold text-gray-800" }, "Analytics Cards"),
+                            React.createElement('button', {
+                                onClick: () => setShowCardModal(true),
+                                className: "px-4 py-2 bg-green-500 mt-[10px] text-white rounded-lg hover:bg-green-600 "
+                            }, "+ Add Card")
+                            
+                        ),
+                        currentPageData.cards && currentPageData.cards.length === 0 ?
+                            React.createElement('div', {
+                                className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-8 text-center"
+                            },
+                                React.createElement('div', { className: "text-gray-500 mb-4" }, "No cards yet. Add your first card to display key metrics.")
+                            ) :
+                            React.createElement('div', {
+                                className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+                            },
+                                currentPageData.cards.map(card => {
+                                    const cardValue = calculateValue(card.calculation, card.column1, card.linkedChartId);
+                                    const linkedChart = card.linkedChartId ? 
+                                        currentPageData.charts.find(c => c.id === card.linkedChartId) : null;
+                                    const isLinked = !!linkedChart;
+                                    const isSelected = selectedCard === card.linkedChartId;
+                                    
+                                    return React.createElement('div', {
+                                        key: card.id,
+                                        className: `card-hover bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-4 relative ${
+                                            isLinked ? 'card-linked' : ''
+                                        } ${isSelected ? 'card-selected' : ''}`,
+                                        onClick: () => {
+                                            if (isLinked) {
+                                                setSelectedCard(isSelected ? null : card.linkedChartId);
+                                            }
+                                        }
+                                    },
+                                        React.createElement('div', { className: "flex justify-between items-start mb-2" },
+                                            card.isEditing ? 
+                                                React.createElement('input', {
+                                                    type: "text",
+                                                    value: card.title,
+                                                    onChange: (e) => editCard(card.id, 'title', e.target.value),
+                                                    onBlur: () => toggleCardEditing(card.id),
+                                                    onKeyDown: (e) => e.key === 'Enter' && toggleCardEditing(card.id),
+                                                    className: "card-edit-input",
+                                                    autoFocus: true
+                                                }) :
+                                                React.createElement('div', { 
+                                                    className: "text-sm text-gray-600 mb-2 cursor-pointer",
+                                                    onClick: (e) => {
+                                                        e.stopPropagation();
+                                                        toggleCardEditing(card.id);
+                                                    }
+                                                }, card.title),
+                                            React.createElement('div', { className: "flex gap-1" },
+                                                React.createElement('button', {
+                                                    onClick: (e) => {
+                                                        e.stopPropagation();
+                                                        toggleCardEditing(card.id);
+                                                    },
+                                                    className: "text-blue-500 hover:text-blue-700"
+                                                }, card.isEditing ? "✓" : "✎"),
+                                                React.createElement('button', {
+                                                    onClick: (e) => {
+                                                        e.stopPropagation();
+                                                        removeCard(card.id);
+                                                    },
+                                                    className: "text-red-500 hover:text-red-700"
+                                                }, "✕")
+                                            )
+                                        ),
+                                        React.createElement('div', { className: "text-2xl font-bold text-gray-800 mb-1" }, cardValue),
+                                        React.createElement('div', { className: "text-xs text-gray-500" }, 
+                                            `${card.calculation.toUpperCase()} of ${card.column1}`,
+                                            isLinked && React.createElement('div', { 
+                                                className: `mt-1 ${isSelected ? 'text-purple-600 font-semibold' : 'text-blue-600'}`
+                                            }, 
+                                                `📊 Linked to: ${linkedChart.title}`,
+                                                isSelected && linkedChart.selectedItem && 
+                                                    React.createElement('div', { className: "text-purple-700" }, 
+                                                        `Filtered by: ${linkedChart.selectedItem}`
+                                                    )
+                                            )
+                                        )
+                                    );
+                                })
+                            )
+                    ),
+                    
+                    // Charts Section
+                    React.createElement('div', { className: "mb-6" },
+                        React.createElement('div', { className: "flex justify-between items-center mb-4" },
+                            React.createElement('h2', { className: "text-xl font-semibold text-gray-800" }, "Dynamic Data Visualization"),
+                            React.createElement('button', {
+                                onClick: addChart,
+                                className: "px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                            }, "+ Add Chart")
+                        ),
+                        currentPageData.charts && currentPageData.charts.length === 0 ? 
+                            React.createElement('div', {
+                                className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-8 text-center"
+                            },
+                                React.createElement('div', { className: "text-gray-500 mb-4" }, "No charts yet. Add your first chart to start visualizing data.")
+                            ) :
+                            React.createElement('div', {
+                                className: "grid grid-cols-1 lg:grid-cols-2 gap-6"
+                            },
+                                currentPageData.charts.map(chart =>
+                                    React.createElement('div', {
+                                        key: chart.id,
+                                        className: `bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-4 relative ${
+                                            chart.selectedItem ? 'chart-highlight' : ''
+                                        }`
+                                    },
+                                        React.createElement('button', {
+                                            onClick: () => removeChart(chart.id),
+                                            className: "absolute top-2 right-2 text-red-500 hover:text-red-700 z-10"
+                                        }, "✕"),
+                                        
+                                        React.createElement('div', { className: "flex justify-between items-center mb-4" },
+                                            React.createElement('input', {
+                                                type: "text",
+                                                value: chart.title,
+                                                onChange: (e) => {
+                                                    const updatedPages = [...pages];
+                                                    const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chart.id);
+                                                    updatedPages[currentPage].charts[chartIndex].title = e.target.value;
+                                                    setPages(updatedPages);
+                                                },
+                                                className: "text-lg font-semibold bg-transparent border-none outline-none flex-1"
+                                            })
+                                        ),
+                                        
+                                        // Dynamic Controls
+                                        React.createElement(DynamicControls, {
+                                            chart: chart,
+                                            onToggleLive: () => toggleChartLive(chart.id),
+                                            onRandomizeData: () => randomizeChartData(chart.id),
+                                            onAddDataPoint: () => addDataPoint(chart.id)
+                                        }),
+                                        
+                                        // Chart Controls
+                                        React.createElement('div', {
+                                            className: "grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 text-sm"
+                                        },
+                                            React.createElement(Dropdown, {
+                                                options: CHART_TYPES,
+                                                value: chart.type,
+                                                onChange: (value) => {
+                                                    const updatedPages = [...pages];
+                                                    const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chart.id);
+                                                    updatedPages[currentPage].charts[chartIndex].type = value;
+                                                    setPages(updatedPages);
+                                                }
+                                            }),
+                                            
+                                            React.createElement(Dropdown, {
+                                                options: columns.map(col => ({ value: col, label: col })),
+                                                value: chart.xAxis,
+                                                onChange: (value) => {
+                                                    const updatedPages = [...pages];
+                                                    const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chart.id);
+                                                    updatedPages[currentPage].charts[chartIndex].xAxis = value;
+                                                    setPages(updatedPages);
+                                                },
+                                                placeholder: "X-Axis"
+                                            }),
+                                            
+                                            // Y-Axis dropdown with same options as X-Axis
+                                            React.createElement(Dropdown, {
+                                                options: columns.map(col => ({ value: col, label: col })),
+                                                value: chart.yAxis,
+                                                onChange: (value) => {
+                                                    const updatedPages = [...pages];
+                                                    const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chart.id);
+                                                    updatedPages[currentPage].charts[chartIndex].yAxis = value;
+                                                    setPages(updatedPages);
+                                                },
+                                                placeholder: "Y-Axis"
+                                            }),
+                                            
+                                            React.createElement(Dropdown, {
+                                                options: Object.keys(COLOR_PALETTES).map(key => ({ value: key, label: key })),
+                                                value: chart.colorPalette,
+                                                onChange: (value) => {
+                                                    const updatedPages = [...pages];
+                                                    const chartIndex = updatedPages[currentPage].charts.findIndex(c => c.id === chart.id);
+                                                    updatedPages[currentPage].charts[chartIndex].colorPalette = value;
+                                                    setPages(updatedPages);
+                                                }
+                                            })
+                                        ),
+                                        
+                                        // Real Chart
+                                        React.createElement(RealChart, { 
+                                            chart: chart, 
+                                            data: data, 
+                                            columns: columns,
+                                            onChartClick: (item) => handleChartClick(chart.id, item),
+                                            isLinked: chart.isLinked,
+                                            isLive: chart.isLive,
+                                            onDataUpdate: (newData) => updateChartData(chart.id, newData)
+                                        }),
+                                        
+                                        // Chart Selection Info
+                                        chart.selectedItem && React.createElement('div', {
+                                            className: "mt-2 text-xs text-purple-600 font-semibold"
+                                        }, `Selected: ${chart.selectedItem}`)
+                                    )
+                                )
+                            )
+                    ),
+                    
+                    // Data Preview
+                    data.length > 0 && React.createElement('div', {
+                        className: "bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-6"
+                    },
+                        React.createElement('h2', {
+                            className: "text-xl font-semibold text-gray-800 mb-4"
+                        }, "Data Preview"),
+                        React.createElement('div', { className: "overflow-x-auto" },
+                            React.createElement('table', { className: "min-w-full bg-white" },
+                                React.createElement('thead', null,
+                                    React.createElement('tr', { className: "bg-gray-100" },
+                                        columns.map(col =>
+                                            React.createElement('th', {
+                                                key: col,
+                                                className: "border px-4 py-2 text-left"
+                                            }, col)
+                                        )
+                                    )
+                                ),
+                                React.createElement('tbody', null,
+                                    data.slice(0, 10).map((row, index) =>
+                                        React.createElement('tr', {
+                                            key: row.id || index,
+                                            className: "hover:bg-gray-50"
+                                        },
+                                            columns.map(col =>
+                                                React.createElement('td', {
+                                                    key: col,
+                                                    className: "border px-4 py-2"
+                                                }, String(row[col] || ''))
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            );
+        }
+        
+        // Render the application
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(Dashboard));
+    </script>
+</body>
+</html>
